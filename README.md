@@ -41,6 +41,7 @@ brew install python@3.8
 Download Python 3.8 from [python.org](https://www.python.org/downloads/release/python-3810/) and install it. Make sure to check "Add Python to PATH" during installation.
 
 ### Create Virtual Environment
+Duckietown simulator is using older versions of some libraries as well as Python. To launch everything easily everytime virtual environment setup is needed.
 
 **Linux/macOS:**
 ```bash
