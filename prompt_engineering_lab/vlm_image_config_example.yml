@@ -1,0 +1,44 @@
+# Example configuration for vlm_image_tester.py
+#
+# Usage:
+#   python vlm_image_tester.py --config vlm_image_config_example.yml
+#
+# Notes:
+# - Images are automatically loaded from the "examples_to_use/" folder next to vlm_image_tester.py.
+# - CLI flags override these values when provided.
+# - mode: "single" or "all". If "single", set which VLM via "vlm".
+# - vlm: one of [phi, tiny, qwen] (used only when mode == single)
+# - prompt: your instruction to the VLMs
+
+mode: all
+vlm: tiny
+prompt: |
+  You are a careful driving assistant. Describe the scene and recommend a safe driving action for the Duckiebot.
+
+# prompt: |
+#     What action should be taken by the vehicle in this situation? 
+#     Provide a decision based on the current state of the environment. 
+#     Describe what you see, the action to take, and why.
+
+# prompt: |
+#   Describe the image in detail. Focus on the environment, road, obstacles, vehicles,
+#   pedestrians, and any relevant details that help understand the scene.
+
+
+# ---------------------------------------------------------------------------
+# (Optional) Full structured schema prompt matching examples_to_use/vlms_json_labels.json
+# Uncomment and replace the simpler prompt above if you want richer outputs.
+# ---------------------------------------------------------------------------
+# prompt: |
+#   You are a driving scene assistant. After analizing the image given, OUTPUT ONLY a single JSON object (no commentary) with these keys:
+#   {
+#     "obstacle_type": "None|Vehicle|Pedestrian|Static",
+#     "lane_position": "Left|Center|Right|Off Track",
+#     "pedestrian_presence": "None|Near",
+#     "collision_warning": true|false,
+#     "intersection_ahead": true|false,
+#     "is_night_time": true|false,
+#     "road_type": "Urban|Rural|Under Construction",
+#     "obstacle_distance": "Near|Moderate|Far|None"
+#   }
+#   Rules: Use only allowed categorical values exactly; booleans must be true/false; if unsure choose the closest valid category; output only JSON.
