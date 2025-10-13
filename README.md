@@ -9,32 +9,97 @@ The current VLM workflow emphasizes producing consistent, structured JSON descri
 ## Contents at a Glance
 | Path | Purpose |
 |------|---------|
-| `.venv/` | Local Python virtual environment (create/activate before running) |
 | `prompt_engineering_lab/` | Offline VLM tester, config template, sample images, labels JSON, live scripts |
 | `gym-duckietown/` | Duckietown simulator snapshot (only needed for live control) |
 
 You can run the offline tester without installing or launching the simulator.
 
-## 1. Environment
-Activate (if already created):
+## 1. Python 3.8 Installation & Environment Setup
+
+### Download and Install Python 3.8
+First, ensure you have Python 3.8 installed on your system:
+
+**Ubuntu/Debian:**
 ```bash
-source .venv/bin/activate
-python --version
+sudo apt update
+sudo apt install python3.8 python3.8-venv python3.8-dev
 ```
-Create if missing:
+
+**CentOS/RHEL/Fedora:**
+```bash
+sudo dnf install python3.8 python3.8-venv python3.8-devel
+# or for older versions: sudo yum install python38 python38-venv python38-devel
+```
+
+**macOS:**
+```bash
+# Using Homebrew
+brew install python@3.8
+```
+
+**Windows:**
+Download Python 3.8 from [python.org](https://www.python.org/downloads/release/python-3810/) and install it. Make sure to check "Add Python to PATH" during installation.
+
+### Create Virtual Environment
+
+**Linux/macOS:**
 ```bash
 python3.8 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 ```
 
-## 2. Install Dependencies
-Install everything needed for the offline tester (the extra pillow/pyyaml/matplotlib lines are already present in `requirements.txt`):
+**Windows (Command Prompt):**
+```cmd
+python3.8 -m venv .venv
+.venv\Scripts\activate
+pip install --upgrade pip
+```
 
+
+To activate in the future:
+
+**Linux/macOS:**
+```bash
+source .venv/bin/activate
+python --version  # Should show Python 3.8.x
+```
+
+**Windows (Command Prompt):**
+```cmd
+.venv\Scripts\activate
+python --version  # Should show Python 3.8.x
+```
+
+
+**Note:** If `python3.8` command is not found on Windows, you may need to use `py -3.8` instead:
+```cmd
+py -3.8 -m venv .venv
+```
+
+## 2. Install Dependencies
+
+### Install Duckietown Simulator (Required for Live Control)
+Install the gym-duckietown package in editable mode:
+
+**Linux/macOS:**
+```bash
+pip3 install -e gym-duckietown
+```
+
+**Windows:**
+```cmd
+pip install -e gym-duckietown
+```
+
+### Install VLM Lab Requirements
+Install everything needed for the offline tester:
+
+**All platforms:**
 ```bash
 pip install -r prompt_engineering_lab/requirements.txt
 ```
-Libraries should be included in the virtual environment. If something is missing istall it manually.
+Libraries should be installed now. If something is missing istall it manually using `pip`.
 
 Notes:
 - First use of each VLM pulls model weights from Hugging Face (one‑time download).
@@ -58,12 +123,21 @@ Contains:
 
 Important: The `vlm_image_tester.py` script loads images directly from `examples_to_use/`. 
 ## 4. Quick Start (30‑Second Demo)
+
+**Linux/macOS:**
 ```bash
 source .venv/bin/activate
 
 # Run all supported models with the provided YAML config
 python3 prompt_engineering_lab/vlm_image_tester.py \
 	--config prompt_engineering_lab/vlm_image_config_example.yml
+```
+
+**Windows:**
+```cmd
+.venv\Scripts\activate
+
+python prompt_engineering_lab/vlm_image_tester.py --config prompt_engineering_lab/vlm_image_config_example.yml
 ```
 Outputs: per‑image & per‑model text files under `prompt_engineering_lab/vlm_image_results/` plus a copy of each image.
 
@@ -103,7 +177,19 @@ vlm_laboratories/
 ## 7. Troubleshooting
 - No images processed: Ensure PNG/JPG files actually exist in `prompt_engineering_lab/examples_to_use/`.
 - Empty / partial outputs: First run still downloading weights; wait for completion or check for Hugging Face auth / rate limit messages.
-- Headless server: Set `MPLBACKEND=Agg` and `DISPLAY=:0`/`DISPLAY=:1` or run with `--no-preview` to disable the interactive window.
+- Headless server: Set environment variables and use `--no-preview` to disable the interactive window.
+
+**Linux/macOS:**
+```bash
+export MPLBACKEND=Agg
+export DISPLAY=:0
+```
+
+**Windows:**
+```cmd
+set MPLBACKEND=Agg
+```
+
 - Very slow first inference: Weight + tokenizer load; subsequent runs are faster due to caching.
 
 ## 8. Next Steps & Ideas
@@ -111,4 +197,3 @@ vlm_laboratories/
 
 ---
 Happy experimenting! Adapt the schema to whatever downstream planning or policy tasks you have in mind.
-# vlm_laboratories
