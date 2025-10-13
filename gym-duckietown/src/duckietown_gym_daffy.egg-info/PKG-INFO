@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: duckietown-gym-daffy
+Version: 6.2.0
+Keywords: duckietown,environment,agent,rl,openaigym,openai-gym,gym
+License-File: LICENSE.pdf
+Requires-Dist: gym>=0.17.1
+Requires-Dist: numpy<=1.20.0,>=1.10.0
+Requires-Dist: pyglet
+Requires-Dist: pyzmq>=16.0.0
+Requires-Dist: opencv-python>=3.4
+Requires-Dist: PyYAML>=3.11
+Requires-Dist: duckietown-world-daffy
+Requires-Dist: PyGeometry-z6
+Requires-Dist: carnivalmirror==0.6.2
+Requires-Dist: zuper-commons-z6
+Requires-Dist: typing_extensions
+Requires-Dist: Pillow

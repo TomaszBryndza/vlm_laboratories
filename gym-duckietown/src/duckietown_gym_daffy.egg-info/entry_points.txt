@@ -1,0 +1,2 @@
+[console_scripts]
+dt-check-gpu = gym_duckietown.check_hw:main
