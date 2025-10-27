@@ -11,7 +11,8 @@ Compact lab to evaluate multiple open‑source Vision‑Language Models (VLMs) o
   - [Installation](#installation)
   - [Usage](#usage)
     - [Offline image tester (recommended starting point)](#offline-image-tester-recommended-starting-point)
-    - [Live manual control (advanced)](#live-manual-control-advanced)
+    - [Live manual control (advanced, unified simulator)](#live-manual-control-advanced-unified-simulator)
+      - [Adding a New Model](#adding-a-new-model)
   - [Configuration](#configuration)
   - [Examples \& Labels](#examples--labels)
   - [CLI Flags Quick Reference](#cli-flags-quick-reference)
@@ -30,11 +31,11 @@ The live control scripts mirror the classic Duckietown manual control app and le
 - YAML‑configurable prompts and mode selection (single/all, which VLM).
 - Automatic discovery of images from a local folder.
 - Per‑image, per‑model output files (text) and optional saved image copies.
-Three VLM backends supported out of the box:
-  - microsoft/Phi‑3.5‑vision‑instruct
-  - anananan116/TinyVLM
-  - Qwen/Qwen2‑VL‑2B‑Instruct
-- Optional live “manual control” scripts for on‑demand VLM inference on simulator frames.
+Three VLM backends supported out of the box (extensible via `vlm_runners.py`):
+  - microsoft/Phi‑3.5‑vision‑instruct (`phi`)
+  - anananan116/TinyVLM (`tiny`)
+  - Qwen/Qwen2‑VL‑2B‑Instruct (`qwen`)
+- Unified live manual control simulator (`live_vlm_test/simulator.py`) with pluggable model selection (`--vlm-model`).
 
 Structured label objective (current lab focus): prompt the models to output a JSON object capturing scene attributes (obstacles, lane position, etc.) matching the schema in `examples_to_use/vlms_json_labels.json`.
 
@@ -45,10 +46,12 @@ Structured label objective (current lab focus): prompt the models to output a JS
 - `requirements.txt` – Core Python packages (torch, transformers, torchvision, pillow, pyyaml, matplotlib)
 - `vlm_image_tester.py` – Main CLI (loads images from `examples_to_use/`)
 - `vlm_image_config_example.yml` – Example YAML config (note: filename contains `_example` not `.example`)
-- `live_vlm_test/` – Live/manual control scripts
-  - `phi_vlm_manual_control.py`
-  - `tiny_vlm_manual_control.py`
-  - `qwen_vlm_manual_control.py`
+-- `live_vlm_test/` – Unified live/manual control
+  - `simulator.py` (ENTER triggers VLM on current frame)
+  - `vlm_runners.py` (shared runner classes + factory)
+  - `phi_vlm_manual_control.py` (wrapper -> simulator with `--vlm-model=phi`)
+  - `tiny_vlm_manual_control.py` (wrapper)
+  - `qwen_vlm_manual_control.py` (wrapper)
 - `examples_to_use/` – Sample images + `vlms_json_labels.json` rich label schema (consumed directly by the tester)
 
 ## Installation
@@ -131,20 +134,36 @@ Other additional flags of interest for console launch:
 
 Outputs: For each `image.png` and model `tiny`, you’ll get `vlm_image_results/image_tiny.txt` containing the prompt and the model’s output. A copy of the input image is also saved once per image name. Use these to compare against labels if you adapt an evaluation script.
 
-### Live manual control (advanced)
-These scripts open a Duckietown manual control window and let you press ENTER to run a VLM on the current frame:
+### Live manual control (advanced, unified simulator)
+Launch a single generic simulator and choose the model via `--vlm-model {phi,qwen,tiny}`. Press ENTER to run the VLM on the current frame; outputs (description + decision) are saved under a timestamped base name in `--vlm-log-dir`.
 
 **Linux/macOS:**
-- Phi: `python3 live_vlm_test/phi_vlm_manual_control.py`
-- TinyVLM: `python3 live_vlm_test/tiny_vlm_manual_control.py`
-- Qwen: `python3 live_vlm_test/qwen_vlm_manual_control.py`
+```bash
+python3 live_vlm_test/simulator.py --vlm-model phi
+python3 live_vlm_test/simulator.py --vlm-model qwen
+python3 live_vlm_test/simulator.py --vlm-model tiny
+```
 
 **Windows:**
-- Phi: `python live_vlm_test/phi_vlm_manual_control.py`
-- TinyVLM: `python live_vlm_test/tiny_vlm_manual_control.py`
-- Qwen: `python live_vlm_test/qwen_vlm_manual_control.py`
+```cmd
+python live_vlm_test\simulator.py --vlm-model phi
+python live_vlm_test\simulator.py --vlm-model qwen
+python live_vlm_test\simulator.py --vlm-model tiny
+```
 
-You may need additional dependencies (Gym, Pyglet, Duckietown assets) and a working display. 
+Legacy per‑model scripts remain as thin wrappers and still work:
+```bash
+python3 live_vlm_test/phi_vlm_manual_control.py
+python3 live_vlm_test/qwen_vlm_manual_control.py
+python3 live_vlm_test/tiny_vlm_manual_control.py
+```
+
+Extra dependencies: Gym, Pyglet, Duckietown assets, a working display (X11 or similar). For headless use, combine Xvfb with `PYGLET_HEADLESS` settings.
+
+#### Adding a New Model
+1. Implement a class in `vlm_runners.py` with `generate(image, user_text, max_new_tokens)`.
+2. Register it in `RUNNER_MAP` (key -> class).
+3. Run: `python live_vlm_test/simulator.py --vlm-model yourkey`.
 
 ## Configuration
 Use a YAML file to control the tester’s prompt and which model(s) to run. Keys:
@@ -230,8 +249,9 @@ Potential future enhancements:
 - Python 3.8+
 - PyTorch (`torch`), Transformers (`transformers`), TorchVision
 - Pillow (PIL), Matplotlib (interactive preview)
-- Optional (live control): Gym, Pyglet, and Duckietown environment/assets
+- Optional (live control): Gym, Pyglet, Duckietown simulator assets
 - Hugging Face models: Phi‑3.5‑Vision‑Instruct, TinyVLM, Qwen2‑VL‑2B‑Instruct
+- Unified runner abstraction for easy future model additions
 
 
 ## Acknowledgements

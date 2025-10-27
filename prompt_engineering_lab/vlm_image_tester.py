@@ -25,12 +25,10 @@ Usage examples:
     python vlm_image_tester.py --config config.yml
 
 Requirements:
-  - Local files in this folder providing the VLM classes:
-      * VLMRunnerPhi  from live_vlm_test/phi_vlm_manual_control.py
-      * VLMRunnerTiny from live_vlm_test/tiny_vlm_manual_control.py
-      * VLMRunnerQwen     from live_vlm_test/qwen_vlm_manual_control.py
-  - torch, transformers, Pillow
-  - matplotlib (optional, used for inline preview; PIL fallback is used otherwise)
+    - Shared VLM runners implemented in `live_vlm_test/vlm_runners.py` (factory via get_vlm_runner).
+        Legacy manual control scripts no longer contain runner classes after refactor.
+    - torch, transformers, Pillow
+    - matplotlib (optional, used for inline preview; PIL fallback is used otherwise)
 """
 
 from __future__ import annotations
@@ -44,7 +42,7 @@ from typing import Dict, List, Optional, Tuple
 import threading
 import textwrap
 import traceback
-from matplotlib.widgets import Button  # type: ignore
+from matplotlib.widgets import Button  
 
 import torch
 from PIL import Image
@@ -398,35 +396,16 @@ def load_config(path: Optional[str]) -> Dict:
 
 
 def make_vlm_runner(kind: str, device: torch.device):
-    """Factory for VLM runners.
+    """Factory for VLM runners (post-refactor).
 
-    Args:
-        kind: One of 'phi', 'tiny', 'qwen'.
-        device: Torch device on which to place the model.
-
-    Returns:
-        An initialized VLM runner instance.
+    Delegates to `live_vlm_test.vlm_runners.get_vlm_runner` which centralizes
+    the construction logic for all supported models.
     """
-    if kind == "phi":
-        try:
-            from live_vlm_test.phi_vlm_manual_control import VLMRunnerPhi  # type: ignore
-        except Exception as e:  # pragma: no cover
-            raise RuntimeError("Phi VLM is not available; check imports and dependencies.") from e
-        return VLMRunnerPhi(device)
-    elif kind == "tiny":
-        try:
-            from live_vlm_test.tiny_vlm_manual_control import VLMRunnerTiny  # type: ignore
-        except Exception as e:  # pragma: no cover
-            raise RuntimeError("Tiny VLM is not available; check imports and dependencies.") from e
-        return VLMRunnerTiny(device)
-    elif kind == "qwen":
-        try:
-            from live_vlm_test.qwen_vlm_manual_control import VLMRunnerQwen  # type: ignore
-        except Exception as e:  # pragma: no cover
-            raise RuntimeError("Qwen VLM is not available; check imports and dependencies.") from e
-        return VLMRunnerQwen(device)
-    else:  # pragma: no cover
-        raise ValueError(f"Unknown VLM kind: {kind}")
+    try:
+        from live_vlm_test.vlm_runners import get_vlm_runner  # type: ignore
+    except Exception as e:  # pragma: no cover
+        raise RuntimeError("Could not import shared VLM runners module 'vlm_runners'.") from e
+    return get_vlm_runner(kind, device)
 
 
 def ensure_save_dir(save_dir: Optional[str]) -> Optional[str]:

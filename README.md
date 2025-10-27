@@ -9,7 +9,7 @@ The current VLM workflow emphasizes producing consistent, structured JSON descri
 ## Contents at a Glance
 | Path | Purpose |
 |------|---------|
-| `prompt_engineering_lab/` | Offline VLM tester, config template, sample images, labels JSON, live scripts |
+| `prompt_engineering_lab/` | Offline VLM tester, config template, sample images, labels JSON, unified live simulator + VLM runners |
 | `gym-duckietown/` | Duckietown simulator snapshot (only needed for live control) |
 
 You can run the offline tester without installing or launching the simulator.
@@ -104,7 +104,8 @@ Libraries should be installed now. If something is missing istall it manually us
 
 Notes:
 - First use of each VLM pulls model weights from Hugging Face (one‑time download).
-- Extra live control simulator additionally requires a functional graphics stack + Duckietown simulator dependencies (see `gym-duckietown/README.md`). If instalation is needed, use provided version - do not clone newest one.
+- Live manual control now uses a single generic `simulator.py` with pluggable model runners in `vlm_runners.py` (see section below).
+- Extra live control requires a functional graphics stack + Duckietown simulator dependencies (see `gym-duckietown/README.md`). Use the vendored snapshot—avoid mixing with a newer upstream unless you intentionally upgrade.
 
 ## 3. Labeled Example Images
 Folder: `prompt_engineering_lab/examples_to_use/`
@@ -164,16 +165,54 @@ There is a special field and all the suggestions how to insert own prompt.
 ## 6. Project Structure (Abridged)
 ```
 vlm_laboratories/
-├── .venv/
 ├── README.md
 ├── gym-duckietown/
 └── prompt_engineering_lab/
-		├── vlm_image_tester.py          # offline tester CLI (loads from examples_to_use/)
-		├── vlm_image_config_example.yml
-		├── examples_to_use/             # sample images + labels JSON (consumed directly)
-		├── vlm_image_results/           # (created) model outputs
-		└── live_vlm_test/               # optional live scripts
+	├── vlm_image_tester.py          # offline tester CLI (loads from examples_to_use/)
+	├── vlm_image_config_example.yml # example config w/ prompt
+	├── examples_to_use/             # sample images + labels JSON
+	├── vlm_image_results/           # (created) model outputs
+	└── live_vlm_test/
+		├── simulator.py            # unified manual control (ENTER runs selected VLM)
+		├── vlm_runners.py          # shared model runner implementations + factory
+		├── phi_vlm_manual_control.py   # backwards‑compatible wrapper -> simulator
+		├── qwen_vlm_manual_control.py  # wrapper
+		└── tiny_vlm_manual_control.py  # wrapper
 ```
+
+## 4. Live Manual Control (Unified Simulator)
+
+The previous per‑model manual control scripts have been refactored into a single generic simulator and shared model runners.
+
+Key components:
+- `live_vlm_test/simulator.py` — launches Duckietown manual control window; press ENTER to run the chosen VLM on the current frame.
+- `live_vlm_test/vlm_runners.py` — defines `VLMRunnerPhi`, `VLMRunnerQwen`, `VLMRunnerTiny` and a `get_vlm_runner()` factory.
+- Legacy wrappers (`phi_vlm_manual_control.py`, etc.) still work and auto‑inject their model flag.
+
+### Usage
+Activate your virtual environment and ensure simulator dependencies are installed (see earlier sections), then:
+
+```bash
+python prompt_engineering_lab/live_vlm_test/simulator.py --vlm-model phi
+python prompt_engineering_lab/live_vlm_test/simulator.py --vlm-model qwen
+python prompt_engineering_lab/live_vlm_test/simulator.py --vlm-model tiny
+```
+
+Additional useful flags (from `simulator.py`):
+- `--map-name udem1` choose map
+- `--frame-skip 1` frame skip
+- `--max-new-tokens 128` generation budget
+- `--vlm-log-dir vlm_logs` save frame + text outputs (timestamped)
+
+### Why the Refactor?
+Consolidation reduces duplicated keyboard loop / logging logic and makes adding new VLMs as simple as extending `RUNNER_MAP` in `vlm_runners.py`.
+
+### Adding a New Model
+1. Implement a class with a `generate(image: PIL.Image, user_text: str, max_new_tokens: int) -> str` method.
+2. Register it in `RUNNER_MAP`.
+3. Run: `python simulator.py --vlm-model yourkey`.
+
+---
 
 ## 7. Troubleshooting
 - No images processed: Ensure PNG/JPG files actually exist in `prompt_engineering_lab/examples_to_use/`.
@@ -183,7 +222,7 @@ vlm_laboratories/
 **Linux/macOS:**
 ```bash
 export MPLBACKEND=Agg
-export DISPLAY=:0
+export DISPLAY=:1
 ```
 
 **Windows:**

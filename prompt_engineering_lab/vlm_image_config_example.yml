@@ -10,10 +10,10 @@
 # - vlm: one of [phi, tiny, qwen] (used only when mode == single)
 # - prompt: your instruction to the VLMs
 
-mode: all
-vlm: tiny
-prompt: |
-  You are a careful driving assistant. Describe the scene and recommend a safe driving action for the Duckiebot.
+mode: single
+vlm: phi
+# prompt: |
+#   You are a careful driving assistant. Describe the scene and recommend a safe driving action for the Duckiebot.
 
 # prompt: |
 #     What action should be taken by the vehicle in this situation? 
@@ -42,3 +42,30 @@ prompt: |
 #     "obstacle_distance": "Near|Moderate|Far|None"
 #   }
 #   Rules: Use only allowed categorical values exactly; booleans must be true/false; if unsure choose the closest valid category; output only JSON.
+
+prompt: |
+  You are an expert autonomous-driving PERCEPTION system analyzing a single image from a car camera in a virtual driving simulation.
+
+  Your task is to describe what is visible in the image by selecting the most appropriate value for each category below.  
+  Use ONLY visible evidence from the image — do not infer beyond what is clearly shown.
+
+  Respond STRICTLY in the following JSON format and with NO additional text or explanation:
+
+  {
+    "Vulnerable Road User (VRU)": ["None", "Single", "Multiple", "Unknown"],
+    "vehicle": ["None", "Single", "Multiple", "Unknown"],
+    "daylight": ["Day", "Night", "Unknown"],
+    "lane_markers": ["None", "RightOnly", "LeftOnly", "LeftAndRight", "Unknown"],
+    "road_edge": ["None", "RightOnly", "LeftOnly", "LeftAndRight", "Unknown"],
+    "context_road": ["Urban", "Rural", "Highway", "Roadworks", "Unknown"],
+    "context_junction": ["NoJunctionAhead", "JunctionAhead", "RoundaboutAhead", "Unknown"],
+    "context_lane": ["InLaneCorrectDirection", "InLaneWrongDirection", "OutOfLane", "OffRoad", "Unknown"],
+    "context_collidables": [
+      "None",
+      "CollisionRelevantObstaclePresent",
+      "CollisionRelevantVehiclePresent",
+      "CollisionRelevantVRUPresent",
+      "Unknown"
+    ],
+    "risk_collision": ["None", "CollissionImminent", "CollisionRiskHigh", "CollisionRiskLow", "Unknown"]
+  }
