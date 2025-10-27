@@ -11,13 +11,14 @@ Available model keys for factory:
 """
 from __future__ import annotations
 
-from typing import Dict, Type
+from typing import Dict, Type, Optional
 from PIL import Image
 import os
 import re
 import time
 import logging
 import warnings
+import json
 
 import torch
 
@@ -59,18 +60,37 @@ class VLMRunnerPhi:
         ).to(device).eval()
         self.device = device
 
-    def generate(self, image: Image.Image, user_text: str, max_new_tokens: int = 128) -> str:
+    def generate(
+        self,
+        image: Image.Image,
+        user_text: str,
+        max_new_tokens: int = 128,
+        force_json: bool = False,
+        enforce_rule_id: Optional[str] = None,
+    ) -> str:
+        """Generate text from Phi VLM.
+
+        Enhancements over original implementation:
+        - Robust structured-mode detection & balanced JSON extraction (prevents trailing hallucinated prose like 'Article: ...').
+        - Optional rule_id enforcement (overwrite or flag if model outputs a different ID).
+        - Optionally force JSON parsing even if trigger phrase is absent.
+        """
         structured_trigger_phrases = [
-            'Return JSON only', 'STRICT JSON', 'JSON ONLY', 'STRICTLY JSON'
+            'return json only', 'strict json', 'json only', 'strictly json','return json'
         ]
-        is_structured = any(p.lower() in user_text.lower() for p in structured_trigger_phrases)
+        lower_user = user_text.lower()
+        is_structured = any(p in lower_user for p in structured_trigger_phrases) or force_json
+
+        # Minor prompt hardening: explicitly restate single-object expectation when structured
+        hardener = "\nRespond with ONLY one JSON object and nothing after it." if is_structured else ""
         prompt = (
             "<|user|>\n"
             "<|image_1|>\n"
-            f"{user_text}\n"
+            f"{user_text}{hardener}\n"
             "<|end|>\n"
             "<|assistant|>\n"
         )
+
         inputs = None
         last_err = None
         for pack in (
@@ -81,38 +101,89 @@ class VLMRunnerPhi:
         ):
             try:
                 inputs = pack(); break
-            except Exception as e:
+            except Exception as e:  # try fallbacks
                 last_err = e
                 continue
         if inputs is None:
             raise RuntimeError(f"Processor packing failed: {repr(last_err)}")
         inputs = {k: (v.to(self.device) if isinstance(v, torch.Tensor) else v) for k, v in inputs.items()}
+
         prompt_len = None
         if isinstance(inputs.get("input_ids"), torch.Tensor):
             prompt_len = int(inputs["input_ids"].shape[1])
+
         gen_kwargs = {
-            'max_new_tokens': min(max_new_tokens, 64) if is_structured else max_new_tokens,
+            'max_new_tokens': min(max_new_tokens, 56) if is_structured else max_new_tokens,
             'do_sample': not is_structured,
         }
         if is_structured:
             gen_kwargs.update({'temperature': 0.0, 'top_p': 1.0})
+
         with torch.inference_mode():
             output_ids = self.model.generate(**inputs, **gen_kwargs)
+
         if prompt_len is not None and output_ids.shape[1] > prompt_len:
             gen_ids = output_ids[:, prompt_len:]
         else:
             gen_ids = output_ids
-        out_text = self.processor.batch_decode(gen_ids, skip_special_tokens=True)[0].strip()
-        if is_structured:
-            match = re.search(r'\{[^{}]*\}', out_text, re.DOTALL)
-            if match:
-                out_text = match.group(0).strip()
-            else:
-                brace_idx = out_text.find('}')
-                if brace_idx != -1:
-                    out_text = out_text[:brace_idx+1].strip()
-            out_text = re.sub(r'(\}\s*).*$', '\\1', out_text, flags=re.DOTALL)
-        return out_text
+        raw_text = self.processor.batch_decode(gen_ids, skip_special_tokens=True)[0].strip()
+
+        if not is_structured:
+            return raw_text
+
+        # --- Robust JSON object extraction --- #
+        def _balanced_first_object(s: str) -> Optional[str]:
+            start = s.find('{')
+            if start == -1:
+                return None
+            depth = 0
+            for i, ch in enumerate(s[start:], start=start):
+                if ch == '{':
+                    depth += 1
+                elif ch == '}':
+                    depth -= 1
+                    if depth == 0:
+                        return s[start:i+1]
+            return None
+
+        extracted = _balanced_first_object(raw_text) or raw_text
+        trimmed = extracted.strip()
+
+        # Remove any trailing characters after the balanced object (already isolated, but be safe)
+        m = re.match(r'\s*(\{.*\})', trimmed, re.DOTALL)
+        if m:
+            trimmed = m.group(1)
+
+        # Attempt to parse & clean JSON: restrict keys to rule_id, score (others dropped)
+        cleaned_output = trimmed
+        try:
+            obj = json.loads(trimmed)
+            if isinstance(obj, dict):
+                # Normalize rule_id
+                if enforce_rule_id is not None:
+                    obj['rule_id'] = enforce_rule_id
+                # Clamp score to allowed discrete set if present
+                allowed_scores = {0,10,20,30,40,50,60,70,80,90,100}
+                if 'score' in obj:
+                    try:
+                        # Round to nearest allowed bucket
+                        val = int(obj['score'])
+                        if val not in allowed_scores:
+                            # snap to nearest
+                            val = min(allowed_scores, key=lambda x: abs(x - val))
+                        obj['score'] = val
+                    except Exception:
+                        obj['score'] = 0
+                # Reconstruct minimal JSON
+                minimal = {k: obj[k] for k in ('rule_id','score') if k in obj}
+                cleaned_output = json.dumps(minimal, ensure_ascii=False)
+        except Exception:
+            # Fall back: ensure we at least cut after first closing brace
+            brace_idx = trimmed.find('}')
+            if brace_idx != -1:
+                cleaned_output = trimmed[:brace_idx+1]
+
+        return cleaned_output
 
 # ------------------------- Qwen Runner ------------------------- #
 class VLMRunnerQwen:
