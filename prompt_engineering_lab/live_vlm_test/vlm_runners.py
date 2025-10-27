@@ -103,8 +103,6 @@ class VLMRunnerPhi:
         else:
             gen_ids = output_ids
         out_text = self.processor.batch_decode(gen_ids, skip_special_tokens=True)[0].strip()
-        print("AAAAAAAAAAAAAAAAAAAAsfasf", out_text)
-
         if is_structured:
             match = re.search(r'\{[^{}]*\}', out_text, re.DOTALL)
             if match:
