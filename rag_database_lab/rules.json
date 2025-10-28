@@ -1,0 +1,27 @@
+[
+  {
+    "id": "LANE_KEEPING",
+    "rule_text": "Keep centered within your lane; do not cross the lane midline. Reduce speed if lane confidence drops; stop if tracking is lost."
+  },
+  {
+    "id": "SAFE_SPEED",
+    "rule_text": "Adapt speed to curvature, visibility, and stopping distance. Slow before curves and intersections to stop within the visible road."
+  },
+  {
+    "id": "UNCONTROLLED_INTERSECTION",
+    "rule_text": "Approach an uncontrolled intersection cautiously, be ready to stop, yield to vehicles in the intersection and from the right, then proceed when clear."
+  },
+  {
+    "id": "OBSTACLE_AVOIDANCE",
+    "rule_text": "When an obstacle is in your lane, decelerate and bypass smoothly within your lane; stop if no safe in-lane path exists."
+
+  },
+  {
+    "id": "PEDESTRIAN_AWARENESS",
+    "rule_text": "Yield to pedestrians or ducks entering or occupying your path; slow to a crawl and stop if needed until the path is clearly clear."
+  },
+  {
+    "id": "PASSING_OVERTAKING",
+    "rule_text": "Pass only when permitted by the lane layout and safe within your lane; ensure visibility and safe gaps; abort if safety is uncertain."
+  }
+]

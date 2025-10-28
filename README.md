@@ -162,25 +162,39 @@ prompt: |
 	Rules: Output booleans as true/false (not strings). If something is unknown choose the closest valid value. Output ONLY the JSON.
 ```
 There is a special field and all the suggestions how to insert own prompt.
-## 6. Project Structure (Abridged)
+## 6. Project Structure (Expanded)
 ```
 vlm_laboratories/
-├── README.md
-├── gym-duckietown/
+├── README.md                       # Main overview (this file)
+│    
+├── gym-duckietown/                 # Vendored Duckietown simulator snapshot
+│   ├── benchmark.py
+│   ├── manual_control.py
+│   └── ...                         # See its own README for full details
+├── prompt_engineering_lab/
+│   ├── vlm_image_tester.py         # Offline batch tester CLI
+│   ├── vlm_image_config_example.yml# Example YAML config with prompt schema
+│   ├── examples_to_use/            # Sample images + labels JSON (ground truth)
+│   ├── vlm_image_results/          # Per-image & per-model output JSON/text (generated)
+│   ├── live_vlm_test/              # Live simulator + VLM integration
+│   │   ├── simulator.py            # Unified manual control runtime
+│   │   ├── vlm_runners.py          # Model runner implementations (Phi/Qwen/Tiny etc.)
+│   │   ├── phi_vlm_manual_control.py
+│   │   ├── qwen_vlm_manual_control.py
+│   │   └── tiny_vlm_manual_control.py
+│   └── requirements.txt            # Lab-specific Python dependencies
+|	└── README.md                   # Detailed description of this lab usage
+├── rag_database_lab/               # Retrieval-Augmented Generation (RAG) rule applicability lab
+│   ├── base_instruction.txt        # Single-rule evaluation prompt template
+│   ├── batch_instruction.txt       # Multi-rule ranking prompt template
+│   ├── clip_rule_retrieval.py      # CLIP embedding & ranking utilities
+│   ├── qwen_runner_demo.ipynb      # Notebook comparing VLM vs CLIP
+│   ├── rules.json                  # Traffic/behavior rule catalog
+│   └── example_images/             # Scene images used for scoring/retrieval
 └── prompt_engineering_lab/
-	├── vlm_image_tester.py          # offline tester CLI (loads from examples_to_use/)
-	├── vlm_image_config_example.yml # example config w/ prompt
-	├── examples_to_use/             # sample images + labels JSON
-	├── vlm_image_results/           # (created) model outputs
-	└── live_vlm_test/
-		├── simulator.py            # unified manual control (ENTER runs selected VLM)
-		├── vlm_runners.py          # shared model runner implementations + factory
-		├── phi_vlm_manual_control.py   # backwards‑compatible wrapper -> simulator
-		├── qwen_vlm_manual_control.py  # wrapper
-		└── tiny_vlm_manual_control.py  # wrapper
 ```
 
-## 4. Live Manual Control (Unified Simulator)
+## 7. Live Manual Control (Unified Simulator)
 
 The previous per‑model manual control scripts have been refactored into a single generic simulator and shared model runners.
 
@@ -214,7 +228,7 @@ Consolidation reduces duplicated keyboard loop / logging logic and makes adding 
 
 ---
 
-## 7. Troubleshooting
+## 8. Troubleshooting
 - No images processed: Ensure PNG/JPG files actually exist in `prompt_engineering_lab/examples_to_use/`.
 - Empty / partial outputs: First run still downloading weights; wait for completion or check for Hugging Face auth / rate limit messages.
 - Headless server: Set environment variables and use `--no-preview` to disable the interactive window.
@@ -232,8 +246,49 @@ set MPLBACKEND=Agg
 
 - Very slow first inference: Weight + tokenizer load; subsequent runs are faster due to caching.
 
-## 8. Next Steps & Ideas
-- See `prompt_engineering_lab/README.md` for detailed flags, configuration, and live control usage.
+
+
+---
+
+## 9. RAG Database Lab: VLM and CLIP Rule Applicability Benchmark
+
+The `rag_database_lab/` directory contains a self-contained exercise for evaluating and comparing Vision-Language Models (VLMs) and CLIP-based retrieval on the task of rule applicability in simulated driving scenes.
+
+### Purpose
+This lab demonstrates retrieval-augmented generation (RAG) for traffic/behavior rule assessment. It enables you to:
+- Prompt VLMs to score how well each rule applies to a given simulation image (iterative and batch modes)
+- Use CLIP to retrieve and rank rules by visual-text similarity
+- Compare and analyze agreement between VLM and CLIP outputs
+
+### Important note
+Remember to execute all scripts from jupyter nootebook inside the virtual environment used previously.
+
+
+### Contents
+| File/Folder                | Purpose |
+|---------------------------|---------|
+| `base_instruction.txt`    | Prompt template for single-rule VLM evaluation (outputs JSON with rule_id, score, and justification) |
+| `batch_instruction.txt`   | Prompt template for batch VLM evaluation (outputs JSON array of rule_ids ranked by applicability) |
+| `clip_rule_retrieval.py`  | Utilities for CLIP-based rule embedding, ranking, and metrics computation |
+| `example_images/`         | Sample PNG images for evaluation |
+| `qwen_runner_demo.ipynb`  | Main notebook: runs VLM and CLIP evaluations, computes agreement metrics |
+| `rules.json`              | List of traffic/behavior rules (id, rule_text) |
+
+### Quickstart
+1. Activate your Python environment and install dependencies (see above).
+2. Open `rag_database_lab/qwen_runner_demo.ipynb` in Jupyter or VS Code.
+3. Run all cells to:
+	- Load rules and images
+	- Run VLM iterative and batch evaluations
+	- Run CLIP-based retrieval
+	- Compare and visualize results
+
+#### Example Outputs
+- Per-rule JSON scores from VLM (iterative)
+- Ranked rule lists from VLM (batch) and CLIP
+- Correlation and overlap metrics between VLM and CLIP
+
+This lab is ideal for benchmarking, prompt engineering, and exploring the strengths/weaknesses of different vision-language approaches for structured scene understanding.
 
 ---
 Happy experimenting! Adapt the schema to whatever downstream planning or policy tasks you have in mind.
