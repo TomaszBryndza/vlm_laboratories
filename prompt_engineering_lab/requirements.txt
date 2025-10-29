@@ -9,7 +9,7 @@ pandas
 pyglet<=1.5.0,>=1.4.0
 gym>=0.9.0
 numpy<1.20.0,>=1.10.0
-
+PyQt5
 pyzmq>=16.0.0
 # scikit-image>=0.13.1
 # opencv-python>=3.4
@@ -17,7 +17,11 @@ pyzmq>=16.0.0
 opencv-python
 #==4.4.0.44
 pyyaml>=3.11
+<<<<<<< HEAD
 PyQt5
+=======
+matplotlib
+>>>>>>> a9468836671230e405d5f845726b9b57836d9fd0
 dataclasses<=0.6; python_version < '3.7'
 carnivalmirror==0.6.2
 pipdeptree

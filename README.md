@@ -191,7 +191,6 @@ vlm_laboratories/
 │   ├── qwen_runner_demo.ipynb      # Notebook comparing VLM vs CLIP
 │   ├── rules.json                  # Traffic/behavior rule catalog
 │   └── example_images/             # Scene images used for scoring/retrieval
-└── prompt_engineering_lab/
 ```
 
 ## 7. Live Manual Control (Unified Simulator)
