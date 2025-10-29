@@ -17,11 +17,8 @@ pyzmq>=16.0.0
 opencv-python
 #==4.4.0.44
 pyyaml>=3.11
-<<<<<<< HEAD
 PyQt5
-=======
 matplotlib
->>>>>>> a9468836671230e405d5f845726b9b57836d9fd0
 dataclasses<=0.6; python_version < '3.7'
 carnivalmirror==0.6.2
 pipdeptree
