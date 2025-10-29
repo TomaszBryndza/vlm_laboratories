@@ -236,6 +236,7 @@ Consolidation reduces duplicated keyboard loop / logging logic and makes adding 
 ```bash
 export MPLBACKEND=Agg
 export DISPLAY=:1
+unset PYGLET_HEADLESS
 ```
 
 **Windows:**
