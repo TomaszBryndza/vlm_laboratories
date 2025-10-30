@@ -11,6 +11,7 @@ This repository aggregates two pieces that can be used together or separately:
 |------|---------|
 | `prompt_engineering_lab/` | Offline VLM tester, config template, sample images, labels JSON, unified live simulator + VLM runners |
 | `gym-duckietown/` | Duckietown simulator snapshot (only needed for live control) |
+| `rag_database_lab/` | RAG experiments with code and sample images provided. Dual-encoder model compared with corss-attention model |
 
 You can run the offline tester without installing or launching the simulator.
 
