@@ -4,7 +4,7 @@ This repository aggregates two pieces that can be used together or separately:
 1. `prompt_engineering_lab/` — a lightweight Vision‑Language Model (VLM) experimentation lab for running multiple open‑source VLMs on Duckietown‑style images (interactive offline batch tester + optional live/manual control scripts).
 2. `gym-duckietown/` — a vendored snapshot of the Duckietown simulator (refer to its own README for full installation if you need the environment for live control).
 3. `rag_database_lanb/` - Retrieval augmented generation experimentation laboratory. Contains examples of use VLMs in RAG approach - dual-encoder model retrieval results are compared with regular text-outputing cross-attention model retrieval and perception capabilities.
-The current VLM workflow emphasizes producing consistent, structured JSON describing a driving scene. A curated labeled set lives in `prompt_engineering_lab/examples_to_use/` (PNG images + `vlms_json_labels.json`).
+
 
 ## Contents at a Glance
 | Path | Purpose |
