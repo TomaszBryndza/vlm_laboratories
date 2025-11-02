@@ -23,7 +23,7 @@ import json
 import torch
 
 # Transformers imports (lazy error handling for optional models)
-from transformers import AutoProcessor, AutoModelForCausalLM, AutoConfig, AutoTokenizer
+from transformers import AutoProcessor, AutoModelForCausalLM, AutoConfig, AutoTokenizer,AutoModelForVision2Seq
 try:  # Qwen specific
     from transformers import Qwen2VLForConditionalGeneration  # type: ignore
 except Exception:  # pragma: no cover
@@ -186,16 +186,122 @@ class VLMRunnerPhi:
         return cleaned_output
 
 # ------------------------- Qwen Runner ------------------------- #
+class VLMRunnerQwen25:
+    """Wrapper for Qwen/Qwen2.5-VL-* (e.g., 3B/7B/32B) Instruct checkpoints."""
+    def __init__(
+        self,
+        device: torch.device,
+        model_id: str = "Qwen/Qwen2.5-VL-7B-Instruct",
+        dtype: Optional[torch.dtype] = None,
+    ):
+        """
+        Args:
+            device: torch.device, e.g. torch.device("cuda") or torch.device("cpu")
+            model_id: HF repo id for Qwen2.5-VL Instruct (e.g. "Qwen/Qwen2.5-VL-7B-Instruct")
+            dtype: optional torch dtype; if None, picks float16 on CUDA, else float32
+        """
+        self.device = device
+        if dtype is None:
+            dtype = torch.float16 if device.type == "cuda" else torch.float32
+
+        # Processor i model (Qwen2.5-VL używa AutoModelForVision2Seq + trust_remote_code)
+        self.processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
+        self.model = (
+            AutoModelForVision2Seq
+            .from_pretrained(model_id, torch_dtype=dtype, trust_remote_code=True)
+            .to(device)
+            .eval()
+        )
+
+    def _build_messages(self, user_text: str) -> List[Dict[str, Any]]:
+        # Ten sam format wiadomości co w Qwen2-VL: obraz + tekst
+        return [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image"},
+                    {"type": "text", "text": user_text},
+                ],
+            }
+        ]
+
+    def generate(
+        self,
+        image: Image.Image,
+        user_text: str,
+        max_new_tokens: int = 128,
+        do_sample: bool = True,
+        temperature: float = 0.7,
+        top_p: float = 0.9,
+    ) -> str:
+        """
+        Zwraca wygenerowany tekst odpowiedzi dla (obraz, prompt).
+
+        Uwaga: Qwen2.5-VL akceptuje zarówno `messages=...` jak i surowy text z apply_chat_template.
+        """
+        messages = self._build_messages(user_text)
+
+        # Spróbuj ścieżki z messages=..., a jeśli procesor wymaga template — użyj apply_chat_template
+        try:
+            inputs = self.processor(
+                messages=messages,
+                images=[image],
+                return_tensors="pt"
+            )
+        except Exception:
+            text = self.processor.apply_chat_template(
+                messages,
+                add_generation_prompt=True,
+                tokenize=False
+            )
+            inputs = self.processor(
+                text=[text],
+                images=[image],
+                return_tensors="pt"
+            )
+
+        # Przenieś tensory na docelowe urządzenie
+        inputs = {
+            k: (v.to(self.device) if isinstance(v, torch.Tensor) else v)
+            for k, v in inputs.items()
+        }
+
+        # Długość promptu (jeśli dostępna) — żeby odciąć prefiks wejściowy
+        prompt_len = None
+        if isinstance(inputs.get("input_ids"), torch.Tensor):
+            prompt_len = int(inputs["input_ids"].shape[1])
+
+        with torch.inference_mode():
+            output_ids = self.model.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                do_sample=do_sample,
+                temperature=temperature,
+                top_p=top_p,
+            )
+
+        # Wytnij same tokeny generacji (jeśli znamy długość promptu)
+        if prompt_len is not None and output_ids.shape[1] > prompt_len:
+            gen_ids = output_ids[:, prompt_len:]
+        else:
+            gen_ids = output_ids
+
+        out_text = self.processor.batch_decode(
+            gen_ids, skip_special_tokens=True
+        )[0].strip()
+
+        return out_text
+    
 class VLMRunnerQwen:
     """Wrapper for Qwen/Qwen2-VL-2B-Instruct."""
     def __init__(self, device: torch.device):
         if Qwen2VLForConditionalGeneration is None:
             raise RuntimeError("Qwen2VLForConditionalGeneration unavailable; install transformers>=4.43")
-        model_id = "Qwen/Qwen2-VL-2B-Instruct"
+        model_id = "Qwen/Qwen2.5-VL-7B-Instruct"
         self.processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
-        self.model = Qwen2VLForConditionalGeneration.from_pretrained(
-            model_id, torch_dtype=torch.float32, trust_remote_code=True
-        ).to(device).eval()
+        self.model = AutoModelForVision2Seq.from_pretrained(
+            model_id, torch_dtype=torch.float32, device_map="auto", trust_remote_code=True)
+        # ).to(device).eval()
         self.device = device
 
     def generate(self, image: Image.Image, user_text: str, max_new_tokens: int = 128) -> str:

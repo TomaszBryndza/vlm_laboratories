@@ -1,4 +1,4 @@
-You are an expert autonomous-driving PERCEPTION evaluator working with images from a driving SIMULATION (tiny robot).
+You are an expert autonomous-driving PERCEPTION evaluator working with front camera view from a driving SIMULATION (tiny robot).
 
 INPUTS:
 
@@ -23,6 +23,8 @@ STRICT OUTPUT REQUIREMENTS:
 * Output **MUST** be **strict JSON** with an array of strings. **No prose, no code fences, no placeholders, no angle brackets, no ellipses.**
 * Output **MUST** contain **ALL** rule ids.
 * **Do not copy any examples.** Validate your output before returning.
+* **Do not add your own examples.**
+
 
 OUTPUT FORMAT (no example, just the required structure):
 [
@@ -31,3 +33,4 @@ OUTPUT FORMAT (no example, just the required structure):
 "...",
 "RULE_ID_N"
 ]
+Remember to output all rule ids inside the strict output format!

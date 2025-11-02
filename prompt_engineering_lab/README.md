@@ -31,10 +31,11 @@ The live control scripts mirror the classic Duckietown manual control app and le
 - YAML‑configurable prompts and mode selection (single/all, which VLM).
 - Automatic discovery of images from a local folder.
 - Per‑image, per‑model output files (text) and optional saved image copies.
-Three VLM backends supported out of the box (extensible via `vlm_runners.py`):
+Four VLM backends supported out of the box (extensible via `vlm_runners.py`):
   - microsoft/Phi‑3.5‑vision‑instruct (`phi`)
   - anananan116/TinyVLM (`tiny`)
   - Qwen/Qwen2‑VL‑2B‑Instruct (`qwen`)
+  - Qwen/Qwen2.5‑VL‑7B‑Instruct (`qwen25`)
 - Unified live manual control simulator (`live_vlm_test/simulator.py`) with pluggable model selection (`--vlm-model`).
 
 Structured label objective (current lab focus): prompt the models to output a JSON object capturing scene attributes (obstacles, lane position, etc.) matching the schema in `examples_to_use/vlms_json_labels.json`.
