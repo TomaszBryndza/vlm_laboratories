@@ -1,0 +1,17 @@
+torch
+transformers
+torchvision
+pillow
+matplotlib
+pyyaml
+numpy
+opencv-python
+pandas
+# Retrieval / similarity
+# CLIP already via transformers
+scikit-learn
+# Optional acceleration
+accelerate
+# Progress + utilities
+tqdm
+

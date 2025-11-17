@@ -10,7 +10,7 @@
 # - vlm: one of [phi, tiny, qwen] (used only when mode == single)
 # - prompt: your instruction to the VLMs
 
-mode: single
+mode: all
 vlm: phi
 # prompt: |
 #   You are a careful driving assistant. Describe the scene and recommend a safe driving action for the Duckiebot.

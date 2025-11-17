@@ -1,9 +1,10 @@
 # Vision‑Language Model Laboratory + Duckietown Simulator Snapshot
 
-This repository aggregates two pieces that can be used together or separately:
-1. `prompt_engineering_lab/` — a lightweight Vision‑Language Model (VLM) experimentation lab for running multiple open‑source VLMs on Duckietown‑style images (interactive offline batch tester + optional live/manual control scripts).
-2. `gym-duckietown/` — a vendored snapshot of the Duckietown simulator (refer to its own README for full installation if you need the environment for live control).
-3. `rag_database_lanb/` - Retrieval augmented generation experimentation laboratory. Contains examples of use VLMs in RAG approach - dual-encoder model retrieval results are compared with regular text-outputing cross-attention model retrieval and perception capabilities.
+This repository aggregates several research labs and a simulator snapshot that can be used together or independently:
+1. `prompt_engineering_lab/` — lightweight VLM perception & prompt engineering lab (multi‑model runners + offline batch tester + optional live/manual control).
+2. `gym-duckietown/` — vendored Duckietown simulator snapshot (see its own README for full install & advanced usage).
+3. `rag_database_lab/` — retrieval‑augmented generation (RAG) rule applicability lab (CLIP vs VLM ranking & agreement analysis).
+4. `vlm_decision_lab/` — action suggestion, multi‑view fusion, RAG‑augmented decisions, temporal stability & prompt ablation (standardized on Qwen2.5‑VL Instruct).
 
 
 ## Contents at a Glance
@@ -11,7 +12,8 @@ This repository aggregates two pieces that can be used together or separately:
 |------|---------|
 | `prompt_engineering_lab/` | Offline VLM tester, config template, sample images, labels JSON, unified live simulator + VLM runners |
 | `gym-duckietown/` | Duckietown simulator snapshot (only needed for live control) |
-| `rag_database_lab/` | RAG experiments with code and sample images provided. Dual-encoder model compared with corss-attention model |
+| `rag_database_lab/` | RAG experiments (CLIP dual‑encoder vs VLM cross‑attention retrieval) |
+| `vlm_decision_lab/` | Action decision experiments: single view, multiview fusion, rule retrieval, temporal consistency, prompt ablation |
 
 You can run the offline tester without installing or launching the simulator.
 
@@ -192,6 +194,19 @@ vlm_laboratories/
 │   ├── qwen_runner_demo.ipynb      # Notebook comparing VLM vs CLIP
 │   ├── rules.json                  # Traffic/behavior rule catalog
 │   └── example_images/             # Scene images used for scoring/retrieval
+├── vlm_decision_lab/               # Action decision lab (single-model Qwen2.5-VL policy)
+│   ├── README.md                   # Detailed lab docs (schema, metrics, RAG, temporal)
+│   ├── requirements.txt            # Lab-specific dependencies
+│   ├── utils.py                    # Prompt builders, generator, retrieval & metrics helpers
+│   ├── evaluation.py               # Aggregates action & stability metrics
+│   ├── experiment1_single_view_baseline.ipynb
+│   ├── experiment2_multiview_fusion.ipynb
+│   ├── experiment3_rag_augmented_actions.ipynb
+│   ├── experiment4_comparative_metrics.ipynb
+│   ├── experiment5_prompt_ablation.ipynb
+│   ├── experiment6_sequence_consistency.ipynb
+│   ├── example_edge_samples/       # 6 paired frames + ground_truth_actions.json
+│   └── example_sequence_samples/   # 10 paired frames + ground_truth_actions.json
 ```
 
 ## 7. Live Manual Control (Unified Simulator)
@@ -261,8 +276,6 @@ This lab demonstrates retrieval-augmented generation (RAG) for traffic/behavior 
 - Use CLIP to retrieve and rank rules by visual-text similarity
 - Compare and analyze agreement between VLM and CLIP outputs
 
-### Important note
-Remember to execute all scripts from jupyter nootebook inside the virtual environment used previously.
 
 
 ### Contents
@@ -292,4 +305,36 @@ Remember to execute all scripts from jupyter nootebook inside the virtual enviro
 This lab is ideal for benchmarking, prompt engineering, and exploring the strengths/weaknesses of different vision-language approaches for structured scene understanding.
 
 ---
-Happy experimenting! Adapt the schema to whatever downstream planning or policy tasks you have in mind.
+## 10. VLM Decision Lab: Action Suggestion, Fusion & Temporal Stability
+
+The `vlm_decision_lab/` focuses on how a Vision‑Language Model recommends driving actions given varying context:
+
+Features:
+- Single front camera vs multiview (camera + bird's‑eye map) fusion.
+- Retrieval‑Augmented Generation: inject top‑k relevant rules (from `rag_database_lab/rules.json`) using CLIP similarity.
+- Temporal sequence stability metrics (flip rate, longest streak) over edge (6) and extended (10) frame sets.
+- Prompt ablation (structured schema vs concise vs minimal) measuring JSON validity & action accuracy.
+- Standardized single‑model policy (Qwen2.5‑VL Instruct) for consistent metrics.
+
+Directory (summary):
+```
+vlm_decision_lab/
+	README.md                  # Detailed, corrected lab documentation
+	requirements.txt           # Core deps (torch, transformers, etc.)
+	utils.py                   # Prompt builders, action generator, RAG retrieval, metrics helpers
+	evaluation.py              # Aggregates metrics from raw model output .txt files
+	experiment1_single_view_baseline.ipynb
+	experiment2_multiview_fusion.ipynb
+	experiment3_rag_augmented_actions.ipynb
+	experiment4_comparative_metrics.ipynb
+	experiment5_prompt_ablation.ipynb
+	experiment6_sequence_consistency.ipynb
+	example_edge_samples/      # 6 paired frames + ground_truth_actions.json
+	example_sequence_samples/  # 10 paired frames + ground_truth_actions.json
+```
+
+
+For deeper details (prompt schema, multiview strategy, RAG process, temporal metrics, extension ideas) consult `vlm_decision_lab/README.md`.
+
+---
+Happy experimenting! 

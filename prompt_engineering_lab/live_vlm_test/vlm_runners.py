@@ -297,13 +297,17 @@ class VLMRunnerQwen:
     def __init__(self, device: torch.device):
         if Qwen2VLForConditionalGeneration is None:
             raise RuntimeError("Qwen2VLForConditionalGeneration unavailable; install transformers>=4.43")
-        model_id = "Qwen/Qwen2.5-VL-7B-Instruct"
+        model_id = "Qwen/Qwen2-VL-2B-Instruct"
         self.processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
+        dm = "cuda" if device.type == "cuda" else "cpu"
         self.model = AutoModelForVision2Seq.from_pretrained(
-            model_id, torch_dtype=torch.float32, device_map="auto", trust_remote_code=True)
-        # ).to(device).eval()
+            model_id,
+            torch_dtype=torch.float32,
+            device_map=dm,
+            trust_remote_code=True,
+            low_cpu_mem_usage=True,
+        ).eval()
         self.device = device
-
     def generate(self, image: Image.Image, user_text: str, max_new_tokens: int = 128) -> str:
         try:
             messages = [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": user_text}]}]
@@ -389,6 +393,7 @@ RUNNER_MAP: Dict[str, Type] = {
     "phi": VLMRunnerPhi,
     "qwen": VLMRunnerQwen,
     "tiny": VLMRunnerTiny,
+    "qwen25": VLMRunnerQwen25,
 }
 
 def get_vlm_runner(name: str, device: torch.device):
