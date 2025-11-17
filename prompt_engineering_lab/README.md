@@ -38,7 +38,15 @@ Four VLM backends supported out of the box (extensible via `vlm_runners.py`):
   - Qwen/Qwen2.5‑VL‑7B‑Instruct (`qwen25`)
 - Unified live manual control simulator (`live_vlm_test/simulator.py`) with pluggable model selection (`--vlm-model`).
 
-Structured label objective (current lab focus): prompt the models to output a JSON object capturing scene attributes (obstacles, lane position, etc.) matching the schema in `examples_to_use/vlms_json_labels.json`.
+Structured label objective (current lab focus): prompt the models to output a JSON object capturing scene attributes matching the schema in `examples_to_use/vlms_json_labels.json`:
+- Vulnerable Road User (VRU): None|Single|Multiple|Unknown
+- vehicle: None|Single|Multiple|Unknown
+- daylight: Day|Night|Unknown
+- lane_markers: None|RightOnly|LeftOnly|LeftAndRight|Unknown
+- road_edge: None|RightOnly|LeftOnly|LeftAndRight|Unknown
+- context_road: Urban|Rural|Highway|Roadworks|Unknown
+- context_junction: NoJunctionAhead|JunctionAhead|RoundaboutAhead|Unknown
+- risk_collision: None|CollissionImminent|CollisionRiskHigh|CollisionRiskLow|Unknown
 
 ## Project Structure
 
@@ -177,24 +185,21 @@ Example (`vlm_image_config_example.yml`):
 mode: all
 vlm: tiny
 prompt: |
-  You are a driving assistant. Analyze a single front-facing road image from the simulation environment of a robot. OUTPUT ONLY a valid JSON object (no extra text, no markdown, no code fences). Return exactly these fields:
+  You are an expert autonomous-driving PERCEPTION system analyzing a single image from a car camera.
+  Respond STRICTLY with one JSON object containing exactly these keys and allowed categorical values:
 
-{
-    "obstacle_type": "None|Vehicle|Pedestrian|Static",
-    "lane_position": "Left|Center|Right|Off Track",
-    "pedestrian_presence": "None|Near",
-    "collision_warning": true|false,
-    "intersection_ahead": true|false,
-    "is_night_time": true|false,
-    "road_type": "Urban|Rural|Under Construction",
-    "obstacle_distance": "Near|Moderate|Far|None"
+  {
+    "Vulnerable Road User (VRU)": ["None", "Single", "Multiple", "Unknown"],
+    "vehicle": ["None", "Single", "Multiple", "Unknown"],
+    "daylight": ["Day", "Night", "Unknown"],
+    "lane_markers": ["None", "RightOnly", "LeftOnly", "LeftAndRight", "Unknown"],
+    "road_edge": ["None", "RightOnly", "LeftOnly", "LeftAndRight", "Unknown"],
+    "context_road": ["Urban", "Rural", "Highway", "Roadworks", "Unknown"],
+    "context_junction": ["NoJunctionAhead", "JunctionAhead", "RoundaboutAhead", "Unknown"],
+    "risk_collision": ["None", "CollissionImminent", "CollisionRiskHigh", "CollisionRiskLow", "Unknown"]
   }
 
-  Rules:
-  Choose answer only from those provided.
-  Treat yellow duck figures as pedestrians.
-  Do not echo the instructions. Output only the JSON object.
-
+  Output only the JSON object (no prose, markdown, or code fences).
 ```
 
 ## Examples & Labels
@@ -202,14 +207,14 @@ Folder: `examples_to_use/`
 
 Labels file: `vlms_json_labels.json` (schema). Each entry includes:
 - image (string filename)
-- obstacle_type (None|Vehicle|Pedestrian|Static)
-- lane_position (Left|Center|Right|Off Track)
-- pedestrian_presence (None|Near)
-- collision_warning (boolean)
-- intersection_ahead (boolean)
-- is_night_time (boolean)
-- road_type (Urban|Rural|Under Construction)
-- obstacle_distance (Near|Moderate|Far|None)
+- Vulnerable Road User (VRU): None|Single|Multiple|Unknown
+- vehicle: None|Single|Multiple|Unknown
+- daylight: Day|Night|Unknown
+- lane_markers: None|RightOnly|LeftOnly|LeftAndRight|Unknown
+- road_edge: None|RightOnly|LeftOnly|LeftAndRight|Unknown
+- context_road: Urban|Rural|Highway|Roadworks|Unknown
+- context_junction: NoJunctionAhead|JunctionAhead|RoundaboutAhead|Unknown
+- risk_collision: None|CollissionImminent|CollisionRiskHigh|CollisionRiskLow|Unknown
 
 Workflow:
 1. Place / verify images in `examples_to_use/`.

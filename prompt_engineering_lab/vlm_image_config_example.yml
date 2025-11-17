@@ -29,19 +29,6 @@ vlm: phi
 # (Optional) Full structured schema prompt matching examples_to_use/vlms_json_labels.json
 # Uncomment and replace the simpler prompt above if you want richer outputs.
 # ---------------------------------------------------------------------------
-# prompt: |
-#   You are a driving scene assistant. After analizing the image given, OUTPUT ONLY a single JSON object (no commentary) with these keys:
-#   {
-#     "obstacle_type": "None|Vehicle|Pedestrian|Static",
-#     "lane_position": "Left|Center|Right|Off Track",
-#     "pedestrian_presence": "None|Near",
-#     "collision_warning": true|false,
-#     "intersection_ahead": true|false,
-#     "is_night_time": true|false,
-#     "road_type": "Urban|Rural|Under Construction",
-#     "obstacle_distance": "Near|Moderate|Far|None"
-#   }
-#   Rules: Use only allowed categorical values exactly; booleans must be true/false; if unsure choose the closest valid category; output only JSON.
 
 prompt: |
   You are an expert autonomous-driving PERCEPTION system analyzing a single image from a car camera in a virtual driving simulation.
@@ -49,7 +36,8 @@ prompt: |
   Your task is to describe what is visible in the image by selecting the most appropriate value for each category below.  
   Use ONLY visible evidence from the image — do not infer beyond what is clearly shown.
 
-  Respond STRICTLY in the following JSON format and with NO additional text or explanation:
+  Respond STRICTLY in the following JSON format and with NO additional text or explanation. The values for each key must be chosen from the allowed options provided.
+  The JSON object must have the following keys and allowed categorical values:
 
   {
     "Vulnerable Road User (VRU)": ["None", "Single", "Multiple", "Unknown"],
@@ -59,13 +47,5 @@ prompt: |
     "road_edge": ["None", "RightOnly", "LeftOnly", "LeftAndRight", "Unknown"],
     "context_road": ["Urban", "Rural", "Highway", "Roadworks", "Unknown"],
     "context_junction": ["NoJunctionAhead", "JunctionAhead", "RoundaboutAhead", "Unknown"],
-    "context_lane": ["InLaneCorrectDirection", "InLaneWrongDirection", "OutOfLane", "OffRoad", "Unknown"],
-    "context_collidables": [
-      "None",
-      "CollisionRelevantObstaclePresent",
-      "CollisionRelevantVehiclePresent",
-      "CollisionRelevantVRUPresent",
-      "Unknown"
-    ],
     "risk_collision": ["None", "CollissionImminent", "CollisionRiskHigh", "CollisionRiskLow", "Unknown"]
   }

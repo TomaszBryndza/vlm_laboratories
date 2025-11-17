@@ -115,16 +115,16 @@ Folder: `prompt_engineering_lab/examples_to_use/`
 
 Contains:
 - `*.png` sample perception frames
-- `vlms_json_labels.json` with a schema:
+- `vlms_json_labels.json` with the current schema (categorical values only):
 	- image (str)
-	- obstacle_type (None|Vehicle|Pedestrian|Static)
-	- lane_position (Left|Center|Right|Off Track)
-	- pedestrian_presence (None|Near)
-	- collision_warning (true|false)
-	- intersection_ahead (true|false)
-	- is_night_time (true|false)
-	- road_type (Urban|Rural|Under Construction)
-	- obstacle_distance (Near|Moderate|Far|None)
+	- Vulnerable Road User (VRU): None|Single|Multiple|Unknown
+	- vehicle: None|Single|Multiple|Unknown
+	- daylight: Day|Night|Unknown
+	- lane_markers: None|RightOnly|LeftOnly|LeftAndRight|Unknown
+	- road_edge: None|RightOnly|LeftOnly|LeftAndRight|Unknown
+	- context_road: Urban|Rural|Highway|Roadworks|Unknown
+	- context_junction: NoJunctionAhead|JunctionAhead|RoundaboutAhead|Unknown
+	- risk_collision: None|CollissionImminent|CollisionRiskHigh|CollisionRiskLow|Unknown
 
 Important: The `vlm_image_tester.py` script loads images directly from `examples_to_use/`. 
 ## 4. Quick Start (30‑Second Demo)
@@ -147,24 +147,26 @@ python prompt_engineering_lab/vlm_image_tester.py --config prompt_engineering_la
 Outputs: per‑image & per‑model text files under `prompt_engineering_lab/vlm_image_results/` plus a copy of each image.
 
 ## 5. Using / Adapting the Prompt
-The default config file (`vlm_image_config_example.yml`) ships with some example prompts such as:
+The default config file (`prompt_engineering_lab/vlm_image_config_example.yml`) now includes a structured JSON schema. Example excerpt:
 ```yaml
 prompt: |
-	You are a driving scene understanding assistant. Analyze this single front‑facing image from a robot simulator.
-	OUTPUT ONLY one JSON object (no prose, no markdown). Use these exact keys:
-	{
-		"obstacle_type": "None|Vehicle|Pedestrian|Static",
-		"lane_position": "Left|Center|Right|Off Track",
-		"pedestrian_presence": "None|Near",
-		"collision_warning": true|false,
-		"intersection_ahead": true|false,
-		"is_night_time": true|false,
-		"road_type": "Urban|Rural|Under Construction",
-		"obstacle_distance": "Near|Moderate|Far|None",
-	}
-	Rules: Output booleans as true/false (not strings). If something is unknown choose the closest valid value. Output ONLY the JSON.
+  You are an expert autonomous-driving PERCEPTION system analyzing a single image.
+  Respond STRICTLY with a single JSON object using these keys and allowed values:
+
+  {
+    "Vulnerable Road User (VRU)": ["None", "Single", "Multiple", "Unknown"],
+    "vehicle": ["None", "Single", "Multiple", "Unknown"],
+    "daylight": ["Day", "Night", "Unknown"],
+    "lane_markers": ["None", "RightOnly", "LeftOnly", "LeftAndRight", "Unknown"],
+    "road_edge": ["None", "RightOnly", "LeftOnly", "LeftAndRight", "Unknown"],
+    "context_road": ["Urban", "Rural", "Highway", "Roadworks", "Unknown"],
+    "context_junction": ["NoJunctionAhead", "JunctionAhead", "RoundaboutAhead", "Unknown"],
+    "risk_collision": ["None", "CollissionImminent", "CollisionRiskHigh", "CollisionRiskLow", "Unknown"]
+  }
 ```
-There is a special field and all the suggestions how to insert own prompt.
+Tips:
+- Output only the JSON object (no prose, markdown, or code fences).
+- Choose values strictly from the allowed options.
 ## 6. Project Structure (Expanded)
 ```
 vlm_laboratories/

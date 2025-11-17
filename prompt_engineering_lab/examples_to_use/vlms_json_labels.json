@@ -1,68 +1,68 @@
 [
   {
-  "image": "ex1_vlm_double_turn.png",
-  "obstacle_type": "None",
-  "lane_position": "Right",
-  "pedestrian_presence": "None",
-  "collision_warning": false,
-  "intersection_ahead": false,
-  "is_night_time": false,
-  "road_type": "Rural",
-  "obstacle_distance": "None"
+    "image": "ex1_vlm_double_turn.png",
+    "Vulnerable Road User (VRU)": "None",
+    "vehicle": "None",
+    "daylight": "Day",
+    "lane_markers": "LeftAndRight",
+    "road_edge": "RightOnly",
+    "context_road": "Rural",
+    "context_junction": "NoJunctionAhead",
+    "risk_collision": "None"
   },
   {
-  "image": "ex2_vlm_duckiebot.png",
-  "obstacle_type": "Vehicle",
-  "lane_position": "Center",
-  "pedestrian_presence": "None",
-  "collision_warning": true,
-  "intersection_ahead": false,
-  "is_night_time": false,
-  "road_type": "Rural",
-  "obstacle_distance": "moderate"
+    "image": "ex2_vlm_duckiebot.png",
+    "Vulnerable Road User (VRU)": "None",
+    "vehicle": "Single",
+    "daylight": "Day",
+    "lane_markers": "LeftAndRight",
+    "road_edge": "LeftAndRight",
+    "context_road": "Rural",
+    "context_junction": "NoJunctionAhead",
+    "risk_collision": "CollisionRiskHigh"
   },
-    {
-  "image": "ex3_vlm_cones.png",
-  "obstacle_type": "Static",
-  "lane_position": "Right",
-  "pedestrian_presence": "None",
-  "collision_warning": true,
-  "intersection_ahead": false,
-  "is_night_time": false,
-  "road_type": "Rural",
-  "obstacle_distance": "Near"
+  {
+    "image": "ex3_vlm_cones.png",
+    "Vulnerable Road User (VRU)": "None",
+    "vehicle": "None",
+    "daylight": "Day",
+    "lane_markers": "LeftAndRight",
+    "road_edge": "LeftAndRight",
+    "context_road": "Rural",
+    "context_junction": "NoJunctionAhead",
+    "risk_collision": "CollissionImminent"
   },
-      {
-  "image": "ex4_vlm_left_turn.png",
-  "obstacle_type": "None",
-  "lane_position": "Right",
-  "pedestrian_presence": "None",
-  "collision_warning": false,
-  "intersection_ahead": false,
-  "is_night_time": false,
-  "road_type": "Rural",
-  "obstacle_distance": "None"
+  {
+    "image": "ex4_vlm_left_turn.png",
+    "Vulnerable Road User (VRU)": "None",
+    "vehicle": "None",
+    "daylight": "Day",
+    "lane_markers": "LeftAndRight",
+    "road_edge": "RightOnly",
+    "context_road": "Rural",
+    "context_junction": "NoJunctionAhead",
+    "risk_collision": "None"
   },
-      {
-  "image": "ex5_vlm_duckie.png",
-  "obstacle_type": "Pedestrian",
-  "lane_position": "Right",
-  "pedestrian_presence": "Near",
-  "collision_warning": true,
-  "intersection_ahead": false,
-  "is_night_time": true,
-  "road_type": "Rural",
-  "obstacle_distance": "Near"
+  {
+    "image": "ex5_vlm_duckie.png",
+    "Vulnerable Road User (VRU)": "Single",
+    "vehicle": "None",
+    "daylight": "Night",
+    "lane_markers": "LeftAndRight",
+    "road_edge": "LeftAndRight",
+    "context_road": "Rural",
+    "context_junction": "NoJunctionAhead",
+    "risk_collision": "CollisionRiskHigh"
   },
-        {
-  "image": "ex6_vlm_intersection.png",
-  "obstacle_type": "Vehicle",
-  "lane_position": "Right",
-  "pedestrian_presence": "None",
-  "collision_warning": false,
-  "intersection_ahead": true,
-  "is_night_time": false,
-  "road_type": "Rural",
-  "obstacle_distance": "Far"
+  {
+    "image": "ex6_vlm_intersection.png",
+    "Vulnerable Road User (VRU)": "None",
+    "vehicle": "None",
+    "daylight": "Day",
+    "lane_markers": "LeftAndRight",
+    "road_edge": "LeftAndRight",
+    "context_road": "Rural",
+    "context_junction": "JunctionAhead",
+    "risk_collision": "None"
   }
 ]
