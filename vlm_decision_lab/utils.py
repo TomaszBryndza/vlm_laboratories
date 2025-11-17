@@ -56,13 +56,12 @@ except Exception as e:  # fail fast: user must have prompt_engineering_lab intac
 
 _qwen_runner: Optional[VLMRunnerQwen25] = None
 
-def _get_qwen_runner() -> VLMRunnerQwen25:
+def _get_qwen_runner(device: Optional[str] = None) -> VLMRunnerQwen25:
     global _qwen_runner
     if _qwen_runner is not None:
         return _qwen_runner
     import torch
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu')
+    device = ('cuda' if torch.cuda.is_available() else 'cpu') if device is None else device
     _qwen_runner = VLMRunnerQwen25(device=device)
     return _qwen_runner
 
@@ -89,13 +88,14 @@ def generate_action(
     max_new_tokens: int = 128,
     temperature: float = 0.2,
     do_sample: bool = True,
+    device: Optional[str] = 'cpu',
 ) -> str:
     """Generate an action rationale using the standardized Qwen2.5-VL model.
 
     Parameters mirror the previous multi-model API; `model_key` is ignored.
     Only the first image is passed to the model (if multiview provided, encode map context inside `prompt`).
     """
-    runner = _get_qwen_runner()
+    runner = _get_qwen_runner(device=device)
     primary = images[0] if images else Image.new('RGB', (256,256), 'black')
     # Adjust sampling arguments: temperature applies only if do_sample True
     res = runner.generate(
