@@ -1,0 +1,10 @@
+{
+  "actions": [
+    "LEFT",
+    "FORWARD",
+    "LEFT",
+    "FORWARD",
+    "STOP",
+    "FORWARD"
+  ]
+}

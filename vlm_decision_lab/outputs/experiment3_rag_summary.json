@@ -1,0 +1,19 @@
+{
+  "baseline_actions": [
+    "FORWARD",
+    "FORWARD",
+    "STOP",
+    "FORWARD",
+    "FORWARD",
+    "STOP"
+  ],
+  "rag_actions": [
+    "SLOW",
+    "STOP",
+    "STOP",
+    "SLOW",
+    "STOP",
+    "STOP"
+  ],
+  "action_changes_due_to_rag": 4
+}

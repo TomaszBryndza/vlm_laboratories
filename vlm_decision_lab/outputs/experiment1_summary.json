@@ -1,0 +1,13 @@
+{
+  "actions": [
+    "FORWARD",
+    "FORWARD",
+    "LEFT",
+    "FORWARD",
+    "FORWARD",
+    "STOP"
+  ],
+  "accuracy": 0.0,
+  "json_validity": 1.0,
+  "avg_latency_s": 36.94840463002523
+}

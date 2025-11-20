@@ -1,0 +1,16 @@
+{
+  "actions": [
+    "FORWARD",
+    "FORWARD",
+    "FORWARD",
+    "FORWARD",
+    "FORWARD",
+    "FORWARD",
+    "FORWARD",
+    "FORWARD",
+    "FORWARD",
+    "FORWARD"
+  ],
+  "flip_rate": 0.0,
+  "longest_streak": 10
+}
